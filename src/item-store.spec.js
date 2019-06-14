@@ -1,8 +1,22 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import itemStore from './item-store';
+import deepmerge from 'deepmerge';
+import { Jsona } from 'jsona';
+import itemStore, {
+  SET_ITEM
+} from './item-store';
 
 Vue.use(Vuex);
+
+const testItemRaw = {
+  data: {
+    id: '1',
+    type: 'test',
+    attributes: {
+      title: 'Test attribute'
+    }
+  }
+};
 
 describe('Item store', () => {
   describe('verify error cases', () => {
@@ -16,12 +30,15 @@ describe('Item store', () => {
   });
 
   describe('load item', () => {
+    const jsona = new Jsona();
     let httpClient;
     let store;
 
     beforeEach(() => {
       httpClient = {
-        get: jest.fn()
+        get: jest.fn(),
+        post: jest.fn(),
+        patch: jest.fn()
       };
       store = new Vuex.Store({
         ...itemStore({
@@ -33,15 +50,7 @@ describe('Item store', () => {
 
     it('load simple item', (done) => {
       httpClient.get.mockResolvedValue({
-        data: {
-          data: {
-            id: '1',
-            type: 'test',
-            attributes: {
-              title: 'Test attribute'
-            }
-          }
-        }
+        data: testItemRaw
       });
 
       expect(store.getters.item).toBe(null);
@@ -54,6 +63,54 @@ describe('Item store', () => {
           expect(item.title).toBe('Test attribute');
           expect(store.state.item).toBe(item);
           expect(store.getters.item).toBe(item);
+          expect(httpClient.get).toHaveBeenCalledWith('test/1');
+          done();
+        });
+    });
+
+    it('create item', (done) => {
+      const sendData = deepmerge(testItemRaw, { data: { id: null } });
+      const item = jsona.deserialize(sendData);
+
+      httpClient.post.mockResolvedValue({ data: testItemRaw });
+
+      store.dispatch('save', { item })
+        .then(item => {
+          expect(item.id).toBe('1');
+          expect(item.type).toBe('test');
+          expect(item.title).toBe('Test attribute');
+          expect(store.state.item).toBe(item);
+          expect(store.getters.item).toBe(item);
+          expect(httpClient.post).toHaveBeenCalledWith('test', sendData, {});
+          done();
+        });
+    });
+
+    it('update item', (done) => {
+      const item = jsona.deserialize(testItemRaw);
+      const expectedData = deepmerge(testItemRaw, {
+        data: {
+          attributes: {
+            title: 'Changed value'
+          }
+        }
+      });
+
+      httpClient.patch.mockResolvedValue({ data: expectedData });
+
+      store.commit(SET_ITEM, item);
+
+      item.title = 'Changed value';
+
+      store.dispatch('save')
+        .then(newItem => {
+          expect(newItem.id).toBe('1');
+          expect(newItem.type).toBe('test');
+          expect(newItem.title).toBe('Changed value');
+          expect(store.state.item).toBe(newItem);
+          expect(store.getters.item).toBe(newItem);
+          expect(item).not.toBe(newItem);
+          expect(httpClient.patch).toHaveBeenCalledWith('test/1', expectedData, {});
           done();
         });
     });
