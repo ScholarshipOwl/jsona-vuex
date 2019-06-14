@@ -1,0 +1,20 @@
+{
+  "env": {
+    "browser": true,
+    "es6": true,
+    "jest": true,
+    "node": true
+  },
+  "extends": [
+    "standard",
+    "plugin:jest/recommended"
+  ],
+  "plugins": [
+    "standard",
+    "promise",
+    "jest"
+  ],
+  "rules": {
+    "semi": [2, "always"]
+  }
+}
