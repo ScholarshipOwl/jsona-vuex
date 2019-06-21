@@ -1,5 +1,5 @@
 import itemStore from './src/item-store';
 
-export default {
+export {
   itemStore
 };
