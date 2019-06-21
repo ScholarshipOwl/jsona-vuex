@@ -38,7 +38,8 @@ describe('Item store', () => {
       httpClient = {
         get: jest.fn(),
         post: jest.fn(),
-        patch: jest.fn()
+        patch: jest.fn(),
+        delete: jest.fn()
       };
       store = new Vuex.Store({
         ...itemStore({
@@ -46,6 +47,10 @@ describe('Item store', () => {
           httpClient
         })
       });
+    });
+
+    it('fail when id not provided', () => {
+      expect(() => store.dispatch('load')).toThrow(Error);
     });
 
     it('load simple item', (done) => {
@@ -56,14 +61,15 @@ describe('Item store', () => {
       expect(store.getters.item).toBe(null);
       expect(store.state.item).toBe(null);
 
-      store.dispatch('load', 1)
+      store.dispatch('load', { id: 1 })
         .then(item => {
           expect(item.id).toBe('1');
           expect(item.type).toBe('test');
           expect(item.title).toBe('Test attribute');
           expect(store.state.item).toBe(item);
           expect(store.getters.item).toBe(item);
-          expect(httpClient.get).toHaveBeenCalledWith('test/1');
+          expect(store.getters.loading).toBe(false);
+          expect(httpClient.get).toHaveBeenCalledWith('test/1', {});
           done();
         });
     });
@@ -111,6 +117,22 @@ describe('Item store', () => {
           expect(store.getters.item).toBe(newItem);
           expect(item).not.toBe(newItem);
           expect(httpClient.patch).toHaveBeenCalledWith('test/1', expectedData, {});
+          done();
+        });
+    });
+
+    it('delete item', (done) => {
+      const item = jsona.deserialize(testItemRaw);
+
+      store.commit(SET_ITEM, item);
+
+      httpClient.delete.mockResolvedValue({});
+
+      store.dispatch('delete')
+        .then(respItem => {
+          expect(respItem).toBe(item);
+          expect(store.state.item).toBe(null);
+          expect(httpClient.delete).toHaveBeenCalledWith('test/1', {});
           done();
         });
     });

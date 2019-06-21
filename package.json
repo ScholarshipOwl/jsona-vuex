@@ -1,7 +1,7 @@
 {
-  "name": "vuex-jsona",
+  "name": "jsona-vuex",
   "version": "0.0.1",
-  "description": "Vuex stores for accessing JSON:API data using Jsona models.",
+  "description": "Vuex stores for accessing JSON:API data using Jsona data formater.",
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
@@ -32,7 +32,7 @@
     "babel-cli": "^6.26.0",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.8.0",
-    "deepmerge": "^3.2.0",
+    "deepmerge": "^3.3.0",
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-compat": "^3.1.1",
