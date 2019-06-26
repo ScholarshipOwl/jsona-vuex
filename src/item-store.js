@@ -21,7 +21,7 @@ const defaultConfig = {
   updateMethod: 'patch',
   /**
    * HTTP Client that will be used to send requests
-   * @type {Object}
+   * @type {Object|Function}
    */
   httpClient: null,
   /**
@@ -47,6 +47,11 @@ export default (storeConfig) => {
   if (!resource) {
     throw new Error('"resource" must be set to initiate store.');
   }
+
+  // Allow provide httpClient as a function that will be generated depend on context.
+  function getHttpClient (store, ctx) {
+    return typeof config.httpClient === 'function' ? config.httpClient(store, ctx) : config.httpClient;
+  };
 
   const state = {
     item: config.item,
@@ -82,7 +87,7 @@ export default (storeConfig) => {
 
       ctx.commit(SET_LOADING, true);
 
-      return httpClient.get(path, httpConfig)
+      return getHttpClient(this, ctx).get(path, httpConfig)
         .finally(() => ctx.commit(SET_LOADING, false))
         .then(({ data }) => {
           const item = jsona.deserialize(data);
@@ -113,7 +118,7 @@ export default (storeConfig) => {
 
       ctx.commit(SET_LOADING, true);
 
-      return httpClient[method](path, data, httpConfig)
+      return getHttpClient(this, ctx)[method](path, data, httpConfig)
         .finally(() => ctx.commit(SET_LOADING, false))
         .then(({ data }) => {
           const item = jsona.deserialize(data);
@@ -136,7 +141,7 @@ export default (storeConfig) => {
 
       ctx.commit(SET_LOADING, true);
 
-      return httpClient.delete(path, httpConfig)
+      return getHttpClient(this, ctx).delete(path, httpConfig)
         .finally(() => ctx.commit(SET_LOADING, false))
         .then(() => {
           ctx.commit(SET_ITEM, null);

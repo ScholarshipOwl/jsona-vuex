@@ -53,6 +53,29 @@ describe('Item store', () => {
       expect(() => store.dispatch('load')).toThrow(Error);
     });
 
+    it('provide httpClient as function', (done) => {
+      httpClient.get.mockResolvedValue({
+        data: testItemRaw
+      });
+
+      store = new Vuex.Store({
+        ...itemStore({
+          resource: 'test',
+          httpClient (str, ctx) {
+            expect(str).toBe(store);
+            expect(ctx.state).toBe(store.state);
+            return httpClient;
+          }
+        })
+      });
+
+      store.dispatch('load', { id: 1 })
+        .then(item => {
+          expect(item.id).toBe('1');
+          done();
+        });
+    });
+
     it('load simple item', (done) => {
       httpClient.get.mockResolvedValue({
         data: testItemRaw
