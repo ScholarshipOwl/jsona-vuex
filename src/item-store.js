@@ -10,11 +10,6 @@ const defaultConfig = {
    */
   jsona: new Jsona(),
   /**
-   * Include names used for Jsona serialization
-   * @type {Array}
-   */
-  includeNames: [],
-  /**
    * HTTP method will be used for sending update requests
    * @type {String}
    */
@@ -103,18 +98,16 @@ export default (storeConfig) => {
      * @param {object}  options.form          Data object that will be send instead of item.
      * @param {string}  options.method        Ovveride HTTP method.
      * @param {object}  options.httpConfig    HTTP config.
-     * @param {object}  options.includeNames  Include object in serialization
      *
      * @return {Promise}  Promise that resolved with model with new data.
      */
     save (ctx, options = {}) {
       const item = options.item || ctx.state.item;
       const method = options.method || (item.id ? config.updateMethod : 'post');
-      const includeNames = options.includeNames || config.includeNames;
 
       const path = `${resource}${item.id ? '/' + item.id : ''}`;
       const httpConfig = { ...config.httpConfig, ...options.httpConfig };
-      const data = options.form || jsona.serialize({ stuff: item, includeNames });
+      const data = options.form || jsona.serialize({ stuff: item });
 
       ctx.commit(SET_LOADING, true);
 
