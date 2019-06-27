@@ -76,7 +76,7 @@ describe('Store', () => {
   });
 
   describe('store configurations', () => {
-    it('provide httpClient as function', (done) => {
+    it('provide httpClient as a function', (done) => {
       httpClient.get.mockResolvedValue({
         data: testItemRaw
       });
@@ -93,6 +93,26 @@ describe('Store', () => {
       store.dispatch('load', { id: 1 })
         .then(item => {
           expect(item.id).toBe('1');
+          done();
+        });
+    });
+    it('provide resource as a function', (done) => {
+      httpClient.get.mockResolvedValue({
+        data: testItemRaw
+      });
+
+      store = new Vuex.Store({
+        ...jsonaStore(() => {
+          return 'test/1/related';
+        }, {
+          httpClient
+        })
+      });
+
+      store.dispatch('load')
+        .then(item => {
+          expect(item.id).toBe('1');
+          expect(httpClient.get).toHaveBeenCalledWith('test/1/related', {});
           done();
         });
     });

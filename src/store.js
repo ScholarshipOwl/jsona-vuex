@@ -65,6 +65,10 @@ export default function jsonaStore (resource, storeConfig) {
     return typeof config.httpClient === 'function' ? config.httpClient(store) : config.httpClient;
   }
 
+  function buildResourcePath (store) {
+    return typeof resource === 'function' ? resource(store) : resource;
+  }
+
   const actions = {
     /**
      * Load resource or all resources. Depends if "id" provided.
@@ -76,7 +80,7 @@ export default function jsonaStore (resource, storeConfig) {
      * @return {Promise}  Promise that resolves the model.
      */
     load (context, { id, httpConfig } = {}) {
-      const path = `${resource}${id ? `/${id}` : ''}`;
+      const path = `${buildResourcePath(this)}${id ? `/${id}` : ''}`;
 
       context.commit(SET_LOADING, true);
 
@@ -96,7 +100,7 @@ export default function jsonaStore (resource, storeConfig) {
      * @return {Promise}  Promise with resolved new model.
      */
     create (context, { item, form, httpConfig } = {}) {
-      const path = resource;
+      const path = buildResourcePath(this);
       const createItem = item || context.state.item;
       const data = form || config.jsona.serialize({ stuff: createItem });
 
@@ -122,7 +126,7 @@ export default function jsonaStore (resource, storeConfig) {
       const updateItem = item || context.state.item;
       const updateMethod = method || config.updateMethod;
 
-      const path = `${resource}/${updateItem.id}`;
+      const path = `${buildResourcePath(this)}/${updateItem.id}`;
       const data = form || config.jsona.serialize({ stuff: updateItem });
       const params = { ...config.httpConfig, ...httpConfig };
 
@@ -143,7 +147,7 @@ export default function jsonaStore (resource, storeConfig) {
      */
     delete ({ commit, state }, { item, httpConfig } = {}) {
       const removeItem = item || state.item;
-      const path = `${resource}/${removeItem.id}`;
+      const path = `${buildResourcePath(this)}/${removeItem.id}`;
 
       commit(SET_LOADING, true);
 
