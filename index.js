@@ -1,5 +1,7 @@
-import itemStore from './src/item-store';
+import jsonaStore from './src/store';
+import nuxtJsonaStore from './src/nuxt-store';
 
 export {
-  itemStore
+  jsonaStore,
+  nuxtJsonaStore
 };
