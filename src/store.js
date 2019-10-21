@@ -2,6 +2,7 @@ import defaultConfig from './config';
 
 export const SET_ITEM = 'SET_ITEM';
 export const SET_LOADING = 'SET_LOADING';
+export const SET_LOADED = 'SET_LOADED';
 export const SET_COLLECTION = 'SET_COLLECTION';
 export const UPDATE_COLLECTION_ITEM = 'UPDATE_COLLECTION_ITEM';
 export const DELETE_COLLECTION_ITEM = 'DELETE_COLLECTION_ITEM';
@@ -23,7 +24,8 @@ export default function jsonaStore (resource, storeConfig) {
   const state = {
     item: null,
     collection: null,
-    loading: false
+    loading: false,
+    loaded: false
   };
 
   const mutations = {
@@ -35,6 +37,9 @@ export default function jsonaStore (resource, storeConfig) {
     },
     [SET_LOADING]: (state, isLoading) => {
       state.loading = !!isLoading;
+    },
+    [SET_LOADED]: (state, isLoaded) => {
+      state.loaded = !!isLoaded;
     },
     [UPDATE_COLLECTION_ITEM]: (state, item) => {
       const index = state.collection.findIndex(({ id }) => id === item.id);
@@ -51,6 +56,7 @@ export default function jsonaStore (resource, storeConfig) {
 
   function agrigateResponseData (data, { commit, state }) {
     const result = config.jsona.deserialize(data);
+
     if (Array.isArray(result)) {
       commit(SET_COLLECTION, result);
     } else if (state.collection) {
@@ -58,6 +64,9 @@ export default function jsonaStore (resource, storeConfig) {
     } else {
       commit(SET_ITEM, result);
     }
+
+    commit(SET_LOADED, true);
+
     return result;
   }
 
@@ -168,7 +177,8 @@ export default function jsonaStore (resource, storeConfig) {
   const getters = {
     item: ({ item }) => item,
     collection: ({ collection }) => collection,
-    loading: ({ loading }) => loading
+    loading: ({ loading }) => loading,
+    loaded: ({ loaded }) => loaded
   };
 
   return {

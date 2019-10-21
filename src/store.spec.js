@@ -129,6 +129,7 @@ describe('Store', () => {
 
       store.dispatch('load', { id: 1 })
         .then(item => {
+          expect(store.getters.loaded).toBe(true);
           expect(item.id).toBe('1');
           expect(item.type).toBe('test');
           expect(item.title).toBe('Test attribute');
