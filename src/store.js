@@ -89,6 +89,15 @@ export default function jsonaStore (resource, storeConfig) {
      * @return {Promise}  Promise that resolves the model.
      */
     load (context, { id, httpConfig, reload = true } = {}) {
+      if (!reload && context.state.loaded) {
+        if (context.state.collection) {
+          return Promise.resolve(context.state.collection);
+        }
+        if (!id || (context.state.item && context.state.item.id === id)) {
+          return Promise.resolve(context.state.item);
+        }
+      }
+
       const path = `${buildResourcePath(this)}${id ? `/${id}` : ''}`;
 
       context.commit(SET_LOADING, true);
