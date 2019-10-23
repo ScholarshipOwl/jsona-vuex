@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import defaultConfig from './config';
 
 export const SET_ITEM = 'SET_ITEM';
@@ -30,16 +31,16 @@ export default function jsonaStore (resource, storeConfig) {
 
   const mutations = {
     [SET_COLLECTION]: (state, collection) => {
-      state.collection = collection;
+      Vue.set(state, 'collection', collection);
     },
     [SET_ITEM]: (state, item) => {
-      state.item = item;
+      Vue.set(state, 'item', item);
     },
     [SET_LOADING]: (state, isLoading) => {
-      state.loading = !!isLoading;
+      Vue.set(state, 'loading', !!isLoading);
     },
     [SET_LOADED]: (state, isLoaded) => {
-      state.loaded = !!isLoaded;
+      Vue.set(state, 'loaded', !!isLoaded);
     },
     [UPDATE_COLLECTION_ITEM]: (state, item) => {
       const index = state.collection.findIndex(({ id }) => id === item.id);
@@ -50,7 +51,7 @@ export default function jsonaStore (resource, storeConfig) {
       }
     },
     [DELETE_COLLECTION_ITEM]: (state, item) => {
-      state.collection = state.collection.filter(({ id }) => id !== item.id);
+      Vue.set(state, 'collection', state.collection.filter(({ id }) => id !== item.id));
     }
   };
 
