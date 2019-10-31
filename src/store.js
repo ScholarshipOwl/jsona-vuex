@@ -23,6 +23,8 @@ export default function jsonaStore (resource, storeConfig) {
   }
 
   const state = {
+    config,
+
     item: null,
     collection: null,
     loading: false,
@@ -149,7 +151,8 @@ export default function jsonaStore (resource, storeConfig) {
       const updateItem = item || context.state.item;
       const updateMethod = method || config.updateMethod;
 
-      const path = `${buildResourcePath(this)}/${updateItem.id}`;
+      const links = this.$jsona.modelPropertiesMapper.getLinks(item) || {};
+      const path = links.self || `${buildResourcePath(this)}/${updateItem.id}`;
       const data = form || config.jsona.serialize({ stuff: updateItem });
       const params = { ...config.httpConfig, ...httpConfig };
 
@@ -170,7 +173,8 @@ export default function jsonaStore (resource, storeConfig) {
      */
     delete ({ commit, state }, { item, httpConfig } = {}) {
       const removeItem = item || state.item;
-      const path = `${buildResourcePath(this)}/${removeItem.id}`;
+      const links = this.$jsona.modelPropertiesMapper.getLinks(removeItem) || {};
+      const path = links.self || `${buildResourcePath(this)}/${removeItem.id}`;
 
       commit(SET_LOADING, true);
 
