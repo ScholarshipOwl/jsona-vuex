@@ -147,13 +147,17 @@ export default function jsonaStore (resource, storeConfig) {
      *
      * @return {Promise}  Promise that resolved with model with new data.
      */
-    update (context, { item, form, httpConfig, method } = {}) {
+    update (context, { item, collection, form, httpConfig, method } = {}) {
       const updateItem = item || context.state.item;
+      const updateCollection = collection || context.state.collection;
       const updateMethod = method || config.updateMethod;
 
-      const links = this.$jsona.modelPropertiesMapper.getLinks(item) || {};
-      const path = links.self || `${buildResourcePath(this)}/${updateItem.id}`;
-      const data = form || config.jsona.serialize({ stuff: updateItem });
+      const path = updateItem && updateItem.links && updateItem.links.self
+        ? updateItem.links.self
+        : `${buildResourcePath(this)}/${updateItem ? updateItem.id : ''}`;
+
+      const stuff = updateItem || updateCollection;
+      const data = form || config.jsona.serialize({ stuff });
       const params = { ...config.httpConfig, ...httpConfig };
 
       context.commit(SET_LOADING, true);
@@ -173,8 +177,9 @@ export default function jsonaStore (resource, storeConfig) {
      */
     delete ({ commit, state }, { item, httpConfig } = {}) {
       const removeItem = item || state.item;
-      const links = this.$jsona.modelPropertiesMapper.getLinks(removeItem) || {};
-      const path = links.self || `${buildResourcePath(this)}/${removeItem.id}`;
+      const path = removeItem && removeItem.links && removeItem.links.self
+        ? removeItem.links.self
+        : `${buildResourcePath(this)}/${removeItem.id}`;
 
       commit(SET_LOADING, true);
 
