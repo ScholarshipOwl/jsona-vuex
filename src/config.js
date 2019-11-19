@@ -18,7 +18,7 @@ export default {
   httpClient: null,
   /**
    * HTTP client configurations send with each request.
-   * @type {Object}
+   * @type {Object|Function}
    */
   httpConfig: {}
 };

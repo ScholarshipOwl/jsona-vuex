@@ -1,3 +1,4 @@
+import deepmerge from 'deepmerge';
 import Vue from 'vue';
 import defaultConfig from './config';
 
@@ -77,6 +78,10 @@ export default function jsonaStore (resource, storeConfig) {
     return typeof config.httpClient === 'function' ? config.httpClient(store) : config.httpClient;
   }
 
+  function buildHttpConfig (store) {
+    return (typeof config.httpConfig === 'function' ? config.httpConfig(store) : config.httpConfig) || {};
+  }
+
   function buildResourcePath (store) {
     return typeof resource === 'function' ? resource(store) : resource;
   }
@@ -91,7 +96,7 @@ export default function jsonaStore (resource, storeConfig) {
      *
      * @return {Promise}  Promise that resolves the model.
      */
-    load (context, { id, httpConfig, reload = true } = {}) {
+    load (context, { id, httpConfig = {}, reload = true } = {}) {
       if (!reload && context.state.loaded) {
         if (context.state.collection) {
           return Promise.resolve(context.state.collection);
@@ -110,7 +115,7 @@ export default function jsonaStore (resource, storeConfig) {
       }
 
       return buildHttpClient(this)
-        .get(path, { ...config.httpConfig, ...httpConfig })
+        .get(path, deepmerge(buildHttpConfig(this), httpConfig))
         .finally(() => context.commit(SET_LOADING, false))
         .then(({ data }) => agrigateResponseData(data, context));
     },
@@ -124,7 +129,7 @@ export default function jsonaStore (resource, storeConfig) {
      *
      * @return {Promise}  Promise with resolved new model.
      */
-    create (context, { item, form, httpConfig } = {}) {
+    create (context, { item, form, httpConfig = {} } = {}) {
       const path = buildResourcePath(this);
       const createItem = item || context.state.item;
       const data = form || config.jsona.serialize({ stuff: createItem });
@@ -132,7 +137,7 @@ export default function jsonaStore (resource, storeConfig) {
       context.commit(SET_LOADING, true);
 
       return buildHttpClient(this)
-        .post(path, data, { ...config.httpConfig, ...httpConfig })
+        .post(path, data, deepmerge(buildHttpConfig(this), httpConfig))
         .finally(() => context.commit(SET_LOADING, false))
         .then(({ data }) => agrigateResponseData(data, context));
     },
