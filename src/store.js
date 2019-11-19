@@ -110,13 +110,13 @@ export default function jsonaStore (resource, storeConfig) {
         }
       }
 
-      const path = buildResourcePath(this, id);
-
-      context.commit(SET_LOADING, true);
-
       if (!reload && context.state.loaded) {
         return Promise.resolve(context.state.item);
       }
+
+      const path = buildResourcePath(this, id);
+
+      context.commit(SET_LOADING, true);
 
       return buildHttpClient(this)
         .get(path, deepmerge(buildHttpConfig(this), httpConfig))
