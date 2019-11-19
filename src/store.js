@@ -82,8 +82,12 @@ export default function jsonaStore (resource, storeConfig) {
     return (typeof config.httpConfig === 'function' ? config.httpConfig(store) : config.httpConfig) || {};
   }
 
-  function buildResourcePath (store) {
-    return typeof resource === 'function' ? resource(store) : resource;
+  function buildResourcePath (store, id) {
+    if (typeof resource === 'function') {
+      return resource(store, id);
+    }
+
+    return `${resource}${id ? `/${id}` : ''}`;
   }
 
   const actions = {
@@ -106,7 +110,7 @@ export default function jsonaStore (resource, storeConfig) {
         }
       }
 
-      const path = `${buildResourcePath(this)}${id ? `/${id}` : ''}`;
+      const path = buildResourcePath(this, id);
 
       context.commit(SET_LOADING, true);
 
@@ -159,7 +163,7 @@ export default function jsonaStore (resource, storeConfig) {
 
       const path = updateItem && updateItem.links && updateItem.links.self
         ? updateItem.links.self
-        : `${buildResourcePath(this)}/${updateItem ? updateItem.id : ''}`;
+        : buildResourcePath(this, updateItem ? updateItem.id : null);
 
       const stuff = updateItem || updateCollection;
       const data = form || config.jsona.serialize({ stuff });
@@ -184,7 +188,7 @@ export default function jsonaStore (resource, storeConfig) {
       const removeItem = item || state.item;
       const path = removeItem && removeItem.links && removeItem.links.self
         ? removeItem.links.self
-        : `${buildResourcePath(this)}/${removeItem.id}`;
+        : buildResourcePath(this, removeItem.id);
 
       commit(SET_LOADING, true);
 
